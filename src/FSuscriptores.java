@@ -15,21 +15,25 @@ public class FSuscriptores extends javax.swing.JFrame {
     String url = "https://xglizaola.site/mysql.php";
     ConexionHR cnx = new ConexionHR(url);
 
+    String vista = "SELECT titulo_evento, codigo_acceso, fecha_evento " +
+               "FROM Vista_Mis_Boletos " +
+               "WHERE id_usuario = ";
+    String vista2 = " AND estado_pago = 'Aprobado'";
     String suscriptores = "SELECT idsuscriptores, nombre, estado FROM suscriptores ORDER BY idsuscriptores ";
     String estado = "SELECT estado FROM suscriptores GROUP BY estado ORDER BY estado";
     String asistencia = "SELECT eventos_ideventos, titulo_evento \n"
             + "FROM contrataciones \n"
             + "JOIN eventos ON eventos_ideventos = ideventos ";//eventos a los que asistira
-    String evts = "SELECT "
-                + "titulo_evento, "
-                + "COUNT(suscriptores_idsuscriptores) "
-                + "FROM contrataciones "
-                + "JOIN eventos ON eventos_ideventos = ideventos "
-                + "WHERE eventos_ideventos IN ( "
-                + "    SELECT eventos_ideventos "
-                + "    FROM contrataciones "
-                + "    WHERE suscriptores_idsuscriptores = '";
-    String grupo = "')GROUP BY titulo_evento";//agruparlo por evento
+//    String evts = "SELECT "
+//                + "titulo_evento, "
+//                + "COUNT(suscriptores_idsuscriptores) "
+//                + "FROM contrataciones "
+//                + "JOIN eventos ON eventos_ideventos = ideventos "
+//                + "WHERE eventos_ideventos IN ( "
+//                + "    SELECT eventos_ideventos "
+//                + "    FROM contrataciones "
+//                + "    WHERE suscriptores_idsuscriptores = '";
+//    String grupo = "')GROUP BY titulo_evento";//agruparlo por evento
     //------------
 
     public FSuscriptores() {
@@ -66,6 +70,7 @@ public class FSuscriptores extends javax.swing.JFrame {
         jSeparator1 = new javax.swing.JToolBar.Separator();
         BPdf = new javax.swing.JButton();
         BGrafica = new javax.swing.JButton();
+        BNuevo1 = new javax.swing.JButton();
         PFormulario = new javax.swing.JPanel();
         jLabel1 = new javax.swing.JLabel();
         jLabel2 = new javax.swing.JLabel();
@@ -197,6 +202,21 @@ public class FSuscriptores extends javax.swing.JFrame {
             }
         });
         jToolBar1.add(BGrafica);
+
+        BNuevo1.setIcon(new javax.swing.ImageIcon(getClass().getResource("/img/new.png"))); // NOI18N
+        BNuevo1.setText("Mis Boletos");
+        BNuevo1.setFocusable(false);
+        BNuevo1.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
+        BNuevo1.setMaximumSize(new java.awt.Dimension(100, 70));
+        BNuevo1.setMinimumSize(new java.awt.Dimension(100, 70));
+        BNuevo1.setPreferredSize(new java.awt.Dimension(100, 70));
+        BNuevo1.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
+        BNuevo1.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                BNuevo1ActionPerformed(evt);
+            }
+        });
+        jToolBar1.add(BNuevo1);
 
         PFormulario.setBorder(javax.swing.BorderFactory.createTitledBorder(null, "Datos del suscriptor:", javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, javax.swing.border.TitledBorder.DEFAULT_POSITION, new java.awt.Font("Segoe UI", 0, 14))); // NOI18N
 
@@ -346,14 +366,14 @@ public class FSuscriptores extends javax.swing.JFrame {
                 .addComponent(PTitulo, javax.swing.GroupLayout.PREFERRED_SIZE, 89, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jToolBar1, javax.swing.GroupLayout.PREFERRED_SIZE, 70, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(PFormulario, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                         .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 176, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addComponent(PFondo, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                .addContainerGap(7, Short.MAX_VALUE))
+                .addContainerGap(13, Short.MAX_VALUE))
         );
 
         pack();
@@ -386,6 +406,7 @@ public class FSuscriptores extends javax.swing.JFrame {
         CBPago.setSelectedIndex(0);
         TEmail.setText("");
         CBEstado.setSelectedIndex(0);
+        cnx.entablar(suscriptores, TPacientes);
     }//GEN-LAST:event_BNuevoActionPerformed
 
     private void BGraficaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_BGraficaActionPerformed
@@ -399,25 +420,20 @@ public class FSuscriptores extends javax.swing.JFrame {
                     javax.swing.JOptionPane.WARNING_MESSAGE);
             return;
         }
-        String id = TID.getText(); // Obtenemos el ID del suscriptor seleccionado
-// 2. CONSTRUCCIÓN DE LA CONSULTA SQL
-// Nota: Usamos 'eventos.titulo_evento' para el Eje X y 'COUNT(...)' para el Eje Y
-         String query =evts+id+grupo;
+        String id = TID.getText(); 
 
-// 3. PREPARACIÓN DE DATOS PARA LA GRÁFICA
+         String query = "CALL ObtenerEventosDeUsuario(" + id + ")";
+
+
         ArrayList<String> series = new ArrayList<>();
         ArrayList<ArrayList<String>> datos = new ArrayList<>();
 
-// Ejecutamos la consulta
+
         datos = cnx.consultar(query);
 
-// Definimos el nombre de la serie (la leyenda del gráfico)
         series.add("Total Asistentes");
 
-// 4. GENERACIÓN DEL GRÁFICO
-// Título: "Popularidad de eventos de [ID]"
-// Eje X: "Eventos"
-// Eje Y: "Personas"
+
         GraficaXY graf = new GraficaXY(
                 "Popularidad de los eventos a los que asistira ",
                 "Eventos",
@@ -426,10 +442,10 @@ public class FSuscriptores extends javax.swing.JFrame {
                 datos
         );
 
-// 5. MOSTRAR EN PANTALLA
-        PFondo.removeAll();       // Limpia el gráfico anterior
-        PFondo.add(graf.chartPanel); // Añade el nuevo
-        PFondo.updateUI();        // Refresca la interfaz
+
+        PFondo.removeAll();       
+        PFondo.add(graf.chartPanel); 
+        PFondo.updateUI();        
 
     }//GEN-LAST:event_BGraficaActionPerformed
 
@@ -441,7 +457,7 @@ public class FSuscriptores extends javax.swing.JFrame {
         String mail = TEmail.getText();
         String est = CBEstado.getSelectedItem().toString();
 
-        String[] valores = new String[]{id, nom, pago, fech, mail, est};
+        String[] valores = new String[]{id, nom, mail, fech, pago, est};
         cnx.insertar("suscriptores", valores);
 
         cnx.entablar(suscriptores, TPacientes);
@@ -455,7 +471,7 @@ public class FSuscriptores extends javax.swing.JFrame {
         String mail = TEmail.getText();
         String est = CBEstado.getSelectedItem().toString();
 
-        String[] valores = new String[]{id, nom, pago, fech, mail, est};
+        String[] valores = new String[]{id, nom, mail, fech, pago, est};
         cnx.actualizar("suscriptores", valores);
 
         cnx.entablar(suscriptores, TPacientes);
@@ -470,7 +486,7 @@ public class FSuscriptores extends javax.swing.JFrame {
         String mail = TEmail.getText();
         String est = CBEstado.getSelectedItem().toString();
 
-        String[] valores = new String[]{id, nom, pago, fech, mail, est};
+        String[] valores = new String[]{id, nom, mail, fech, pago, est};
         cnx.borrar("suscriptores", valores);
 
         cnx.entablar(suscriptores, TPacientes);
@@ -498,6 +514,23 @@ public class FSuscriptores extends javax.swing.JFrame {
 
         }
     }//GEN-LAST:event_TPacientesMousePressed
+
+    private void BNuevo1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_BNuevo1ActionPerformed
+        int filaSeleccionada = TPacientes.getSelectedRow(); // <--- Asegúrate que tu tabla se llame TSuscriptores
+
+        if (filaSeleccionada == -1) {
+            javax.swing.JOptionPane.showMessageDialog(this,
+                    "Seleccione un suscriptor de la tabla para analizar sus eventos.",
+                    "Atención",
+                    javax.swing.JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+        String id = TID.getText();
+        String vst=vista+id+vista2;
+        
+        cnx.entablar(vst, TPacientes);
+        
+    }//GEN-LAST:event_BNuevo1ActionPerformed
 
     /**
      * @param args the command line arguments
@@ -530,6 +563,7 @@ public class FSuscriptores extends javax.swing.JFrame {
     private javax.swing.JButton BBorrar;
     private javax.swing.JButton BGrafica;
     private javax.swing.JButton BNuevo;
+    private javax.swing.JButton BNuevo1;
     private javax.swing.JButton BPdf;
     private javax.swing.JComboBox<String> CBEstado;
     private javax.swing.JComboBox<String> CBPago;

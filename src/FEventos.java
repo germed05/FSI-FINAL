@@ -8,6 +8,7 @@ import javax.swing.table.DefaultTableModel;
 
 public class FEventos extends javax.swing.JFrame {
 
+    
     //Video del programa funcionando o de las peticiones 
     ImageIcon icono = new ImageIcon(getClass().getResource("/img/pacientes.png"));
 
@@ -415,10 +416,10 @@ public class FEventos extends javax.swing.JFrame {
                 datos
         );
 
-// 5. MOSTRAR EN PANTALLA
-        PFondo.removeAll();       // Limpia el gráfico anterior
-        PFondo.add(graf.chartPanel); // Añade el nuevo
-        PFondo.updateUI();        // Refresca la interfaz
+
+        PFondo.removeAll();       
+        PFondo.add(graf.chartPanel); 
+        PFondo.updateUI();        
 
     }//GEN-LAST:event_BGraficaActionPerformed
 
