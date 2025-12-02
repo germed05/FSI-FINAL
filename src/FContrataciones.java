@@ -29,6 +29,7 @@ public class FContrataciones extends javax.swing.JFrame {
 
     public FContrataciones() {
         initComponents();
+        TPacientes.setAutoCreateRowSorter(true);
         this.setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
         setLocationRelativeTo(this);
         this.setIconImage(icono.getImage());
@@ -446,21 +447,29 @@ public class FContrataciones extends javax.swing.JFrame {
 
     private void TPacientesMousePressed(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_TPacientesMousePressed
         DefaultTableModel datos = (DefaultTableModel) TPacientes.getModel();
+        
+        
         int rensel = TPacientes.getSelectedRow();
+        
         if (rensel > -1) {
-            String id = datos.getValueAt(rensel, 0).toString();
-            String event = datos.getValueAt(rensel, 1).toString();
-            String estado = datos.getValueAt(rensel, 4).toString();
+            
+            int renselModel = TPacientes.convertRowIndexToModel(rensel);
+            
+
+            
+            String id = datos.getValueAt(renselModel, 0).toString();     // ID Suscriptor
+            String event = datos.getValueAt(renselModel, 1).toString();  // ID Evento
+            String estado = datos.getValueAt(renselModel, 4).toString(); // Estado Pago
+            
             String fech = cnx.obtenerDato("SELECT fecha_pago FROM contrataciones WHERE suscriptores_idsuscriptores = '" + id + "' AND eventos_ideventos = '" + event + "' ");
             String cdg = cnx.obtenerDato("SELECT codigo_acceso FROM contrataciones WHERE suscriptores_idsuscriptores = '" + id + "' AND eventos_ideventos = '" + event + "' ");
 
+            
             CBSuscriptor.setSelectedItem(id);
             CBEvento.setSelectedItem(event);
-            CBEstado.setSelectedItem(id);
             DCFecha.setDate(cnx.toDate(fech));
             CBEstado.setSelectedItem(estado);
             TFCodigo.setText(cdg);
-
         }
     }//GEN-LAST:event_TPacientesMousePressed
 

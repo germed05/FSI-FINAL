@@ -33,6 +33,7 @@ public class FEventos extends javax.swing.JFrame {
 
     public FEventos() {
         initComponents();
+        TEventos.setAutoCreateRowSorter(true);
         this.setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
         setLocationRelativeTo(this);
         this.setIconImage(icono.getImage());
@@ -468,22 +469,34 @@ public class FEventos extends javax.swing.JFrame {
 
     private void TEventosMousePressed(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_TEventosMousePressed
         DefaultTableModel datos = (DefaultTableModel) TEventos.getModel();
+        
+        // 1. Obtener el renglón visual
         int rensel = TEventos.getSelectedRow();
+        
         if (rensel > -1) {
-            String id = datos.getValueAt(rensel, 0).toString();
-            String tit = datos.getValueAt(rensel, 1).toString();
-            String cat = datos.getValueAt(rensel, 4).toString();
-            String fech = cnx.obtenerDato("SELECT fecha_evento FROM eventos WHERE ideventos = '" + id + "' ");
-            String desc = datos.getValueAt(rensel, 2).toString();
-            String cost = datos.getValueAt(rensel, 5).toString();
+            // 2. --- CONVERSIÓN DE ÍNDICE ---
+            // Convertimos la posición visual a la posición real en el modelo
+            int renselModel = TEventos.convertRowIndexToModel(rensel);
+            // -------------------------------
 
+            // 3. Usamos 'renselModel' para obtener los datos correctos
+            String id = datos.getValueAt(renselModel, 0).toString();
+            String tit = datos.getValueAt(renselModel, 1).toString();
+            // Nota: Verifica que los índices 2, 4, 5 sean correctos según tu consulta SQL
+            String desc = datos.getValueAt(renselModel, 2).toString(); 
+            String cat = datos.getValueAt(renselModel, 4).toString();
+            String cost = datos.getValueAt(renselModel, 5).toString();
+            
+            // La consulta a base de datos usa el ID, así que eso no cambia
+            String fech = cnx.obtenerDato("SELECT fecha_evento FROM eventos WHERE ideventos = '" + id + "' ");
+
+            // 4. Llenar los campos de texto
             TID.setText(id);
             TTitulo.setText(tit);
             DCFecha.setDate(cnx.toDate(fech));
             TDesc.setText(desc);
             CBCategoria.setSelectedItem(cat);
             TCosto.setText(cost);
-
         }
     }//GEN-LAST:event_TEventosMousePressed
 

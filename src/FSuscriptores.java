@@ -8,7 +8,7 @@ import javax.swing.table.DefaultTableModel;
 
 public class FSuscriptores extends javax.swing.JFrame {
 
-    //Video del programa funcionando o de las peticiones 
+    
     ImageIcon icono = new ImageIcon(getClass().getResource("/img/pacientes.png"));
 
     //-------------
@@ -38,6 +38,7 @@ public class FSuscriptores extends javax.swing.JFrame {
 
     public FSuscriptores() {
         initComponents();
+        TPacientes.setAutoCreateRowSorter(true);
         this.setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
         setLocationRelativeTo(this);
         this.setIconImage(icono.getImage());
@@ -495,11 +496,23 @@ public class FSuscriptores extends javax.swing.JFrame {
 
     private void TPacientesMousePressed(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_TPacientesMousePressed
         DefaultTableModel datos = (DefaultTableModel) TPacientes.getModel();
+        
+        // 1. Obtener el renglón visual seleccionado
         int rensel = TPacientes.getSelectedRow();
+        
         if (rensel > -1) {
-            String id = datos.getValueAt(rensel, 0).toString();
-            String nom = datos.getValueAt(rensel, 1).toString();
-            String estado = datos.getValueAt(rensel, 2).toString();
+            // 2. --- CORRECCIÓN CRÍTICA ---
+            // Convertimos el índice visual al índice real en el modelo de datos
+            // Si no haces esto, al ordenar, los datos se cruzarán.
+            int renselModel = TPacientes.convertRowIndexToModel(rensel); 
+            // -----------------------------
+
+            // 3. Usamos 'renselModel' en lugar de 'rensel' para sacar los datos
+            String id = datos.getValueAt(renselModel, 0).toString();
+            String nom = datos.getValueAt(renselModel, 1).toString();
+            String estado = datos.getValueAt(renselModel, 2).toString();
+            
+            // Las consultas a la BD siguen igual porque usan el ID que acabamos de recuperar correctamente
             String fech = cnx.obtenerDato("SELECT fecha_reg FROM suscriptores WHERE idsuscriptores = '" + id + "' ");
             String email = cnx.obtenerDato("SELECT email FROM suscriptores WHERE idsuscriptores = '" + id + "' ");
             String pago = cnx.obtenerDato("SELECT metodo_pago FROM suscriptores WHERE idsuscriptores = '" + id + "' ");
@@ -511,7 +524,6 @@ public class FSuscriptores extends javax.swing.JFrame {
             System.out.println("FSuscriptores.TPacientesMousePressed()" + cnx.toSQL(DCFecha.getDate()));
             TEmail.setText(email);
             CBEstado.setSelectedItem(estado);
-
         }
     }//GEN-LAST:event_TPacientesMousePressed
 
